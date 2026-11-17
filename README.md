@@ -43,9 +43,10 @@ Stop the stack with `Ctrl+C`, then run `docker compose down`.
 
 ### Run the API without Docker
 
-The API still needs a DynamoDB-compatible endpoint. Start the included DynamoDB Local service with Compose, then install the Python dependencies in another terminal and create the table:
+The API still needs a DynamoDB-compatible endpoint. Start DynamoDB Local by itself with Compose, then install the Python dependencies in another terminal:
 
 ```bash
+docker compose up -d dynamodb
 python -m venv .venv
 # Windows: .venv\Scripts\Activate.ps1
 # macOS/Linux: source .venv/bin/activate
@@ -90,6 +91,7 @@ uvicorn app.main:app --reload
    Terraform creates the service with zero running tasks so it can succeed before an image has been pushed. Build and push the first image from the repository root using the ECR URL printed by Terraform:
 
    ```bash
+   cd ..
    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin YOUR_ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com
    docker build -t taskforge:initial .
    docker tag taskforge:initial YOUR_ECR_URL:latest
@@ -99,6 +101,7 @@ uvicorn app.main:app --reload
    Start the service after the first image is available:
 
    ```bash
+   cd terraform
    terraform apply -var="aws_region=ap-south-1" -var="github_repository=dk7538456-bot/devops-Boom" -var="desired_count=1"
    ```
 
@@ -149,3 +152,4 @@ docker-compose.yml     Local API and DynamoDB Local
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
