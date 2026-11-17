@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101b2d"><title>TaskForge · Cloud Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <aside class="rail"><div class="brand-mark">TF</div><div class="rail-label">WORKSPACE</div><button class="rail-item active" aria-label="Tasks">▦</button><button class="rail-item" aria-label="Infrastructure">⌁</button><div class="rail-bottom"><span class="avatar">JD</span></div></aside>
+  <main class="layout"><header class="topbar"><div class="crumb">Workspace <span>/</span> <b>Task board</b></div><div class="top-meta"><span class="live-dot"></span> All systems operational <span class="divider"></span> <span id="clock">--:--</span></div></header>
+    <section class="hero"><div><div class="eyebrow">MONDAY, YOUR CLOUD CONTROL ROOM</div><h1>Make work <em>flow.</em></h1><p class="subhead">A calm place to track what matters and keep delivery moving.</p></div><button class="primary" id="addTask"><span>＋</span> New task</button></section>
+    <section class="stats"><article class="stat"><div class="stat-top"><span>OPEN TASKS</span><span class="stat-icon violet">◷</span></div><div class="stat-number" id="openCount">—</div><div class="stat-note">Across your workspace</div></article><article class="stat"><div class="stat-top"><span>IN PROGRESS</span><span class="stat-icon blue">↗</span></div><div class="stat-number" id="progressCount">—</div><div class="stat-note">Moving forward today</div></article><article class="stat"><div class="stat-top"><span>COMPLETED</span><span class="stat-icon green">✓</span></div><div class="stat-number" id="doneCount">—</div><div class="stat-note">Nice work, team</div></article><article class="stat uptime"><div class="stat-top"><span>SERVICE UPTIME</span><span class="stat-icon green">⌁</span></div><div class="stat-number"><span id="uptime">—</span><small> healthy</small></div><div class="stat-note"><i></i> API and data store connected</div></article></section>
+    <section class="board-head"><div><h2>Your tasks <span id="taskTotal">0</span></h2><p>Keep the momentum going.</p></div><div class="filters" role="group" aria-label="Filter tasks"><button class="filter selected" data-filter="all">All <span id="allPill">0</span></button><button class="filter" data-filter="todo">To do</button><button class="filter" data-filter="in_progress">In progress</button><button class="filter" data-filter="done">Done</button></div></section>
+    <section id="taskList" class="task-list" aria-live="polite"></section>
+    <footer><span>TaskForge <b>·</b> Built for resilient delivery</span><span>API v1 <span class="footer-dot"></span> AWS ready</span></footer>
+  </main>
+  <dialog id="taskDialog"><form method="dialog" id="taskForm"><div class="dialog-head"><div><div class="eyebrow">ADD TO YOUR WORKSPACE</div><h2>New task</h2></div><button class="close" value="cancel" aria-label="Close">×</button></div><label>Task title<input name="title" required minlength="3" maxlength="120" placeholder="e.g. Ship the staging environment"></label><label>Description <span class="optional">OPTIONAL</span><textarea name="description" rows="3" maxlength="1000" placeholder="A little context goes a long way"></textarea></label><label>Priority<select name="priority"><option value="medium">Medium</option><option value="high">High</option><option value="low">Low</option></select></label><div class="form-actions"><button class="secondary" value="cancel">Cancel</button><button class="primary" id="saveTask" value="default">Create task</button></div></form></dialog>
+  <div id="toast" class="toast" role="status"></div><script src="/static/app.js" defer></script>
+</body></html>

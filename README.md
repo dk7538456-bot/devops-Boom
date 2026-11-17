@@ -32,8 +32,8 @@ The application tasks run in public subnets so image pulls and CloudWatch loggin
 Requirements: Docker Desktop with Compose enabled.
 
 ```bash
-git clone https://github.com/<your-name>/taskforge.git
-cd taskforge
+git clone https://github.com/dk7538456-bot/devops-Boom.git
+cd devops-Boom
 docker compose up --build
 ```
 
@@ -78,13 +78,13 @@ uvicorn app.main:app --reload
 
    ```bash
    terraform init
-   terraform plan -var="aws_region=ap-south-1" -var="github_repository=YOUR_GITHUB_NAME/taskforge"
+   terraform plan -var="aws_region=ap-south-1" -var="github_repository=dk7538456-bot/devops-Boom"
    ```
 
 3. Apply after reviewing the resources and estimated costs:
 
    ```bash
-   terraform apply -var="aws_region=ap-south-1" -var="github_repository=YOUR_GITHUB_NAME/taskforge"
+   terraform apply -var="aws_region=ap-south-1" -var="github_repository=dk7538456-bot/devops-Boom"
    ```
 
    Terraform creates the service with zero running tasks so it can succeed before an image has been pushed. Build and push the first image from the repository root using the ECR URL printed by Terraform:
@@ -92,23 +92,23 @@ uvicorn app.main:app --reload
    ```bash
    aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin YOUR_ACCOUNT.dkr.ecr.ap-south-1.amazonaws.com
    docker build -t taskforge:initial .
-   docker tag taskforge:initial YOUR_ECR_URL:initial
-   docker push YOUR_ECR_URL:initial
+   docker tag taskforge:initial YOUR_ECR_URL:latest
+   docker push YOUR_ECR_URL:latest
    ```
 
    Start the service after the first image is available:
 
    ```bash
-   terraform apply -var="aws_region=ap-south-1" -var="github_repository=YOUR_GITHUB_NAME/taskforge" -var="desired_count=1"
+   terraform apply -var="aws_region=ap-south-1" -var="github_repository=dk7538456-bot/devops-Boom" -var="desired_count=1"
    ```
 
 4. Read `github_deploy_role_arn` from Terraform output. Add it to GitHub repository **Settings → Secrets and variables → Actions** as `AWS_DEPLOY_ROLE_ARN`.
-5. Push to `main`. CI validates the code and builds the image; the deploy workflow publishes a commit-SHA-tagged image and waits for ECS to become stable. Keep `desired_count=1` in Terraform after the first deploy so later infrastructure changes preserve the running service.
+5. Push to `main`. CI validates the code and builds the image. After the AWS role secret is configured, run **Actions → Deploy to AWS → Run workflow** to publish an immutable commit-and-attempt-tagged image and wait for ECS to become stable. Keep `desired_count=1` in Terraform after the first deploy so later infrastructure changes preserve the running service.
 6. Open `application_url` from Terraform output. Check CloudWatch logs in `/ecs/taskforge` and test `/health/ready`.
 7. Remove the billable demo resources when you are done:
 
    ```bash
-   terraform destroy -var="aws_region=ap-south-1" -var="github_repository=YOUR_GITHUB_NAME/taskforge"
+   terraform destroy -var="aws_region=ap-south-1" -var="github_repository=dk7538456-bot/devops-Boom"
    ```
 
 Terraform state contains infrastructure metadata. Keep it local or use a private, encrypted remote state backend for a team project; do not commit state files.
@@ -149,4 +149,3 @@ docker-compose.yml     Local API and DynamoDB Local
 ## License
 
 MIT. See [LICENSE](LICENSE).
-

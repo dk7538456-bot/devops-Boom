@@ -1,0 +1,38 @@
+name: Deploy to AWS
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+env:
+  AWS_REGION: ap-south-1
+  PROJECT_NAME: taskforge
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+      - uses: aws-actions/amazon-ecr-login@v2
+        id: login-ecr
+      - name: Build, scan and push image
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}-${{ github.run_attempt }}
+        run: |
+          docker build --pull -t "$REGISTRY/$PROJECT_NAME:$IMAGE_TAG" .
+          docker push "$REGISTRY/$PROJECT_NAME:$IMAGE_TAG"
+      - name: Deploy service
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}-${{ github.run_attempt }}
+        run: |
+          aws ecs describe-task-definition --task-definition "$PROJECT_NAME" --query taskDefinition > task-definition.json
+          python -c "import json,os; p='task-definition.json'; d=json.load(open(p)); d['containerDefinitions'][0]['image']=os.environ['REGISTRY']+'/'+os.environ['PROJECT_NAME']+':'+os.environ['IMAGE_TAG']; [d.pop(k,None) for k in ('taskDefinitionArn','revision','status','requiresAttributes','compatibilities','registeredAt','registeredBy')]; json.dump(d,open(p,'w'))"
+          aws ecs register-task-definition --cli-input-json file://task-definition.json > registered.json
+          REVISION=$(python -c "import json; print(json.load(open('registered.json'))['taskDefinition']['taskDefinitionArn'])")
+          aws ecs update-service --cluster "$PROJECT_NAME" --service "$PROJECT_NAME" --task-definition "$REVISION" --force-new-deployment
+          aws ecs wait services-stable --cluster "$PROJECT_NAME" --services "$PROJECT_NAME"
